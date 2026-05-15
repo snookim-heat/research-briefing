@@ -4,10 +4,19 @@ on:
   schedule:
     # 매주 월요일 한국시간 오전 8시 = UTC 일요일 23:00
     - cron: "0 23 * * 0"
-  workflow_dispatch:  # 수동 실행 가능
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-  digest:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -21,10 +30,35 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Build weekly digest
+      - name: Restore previous site (archive)
+        uses: actions/cache@v4
+        with:
+          path: site
+          key: digest-site-${{ github.run_id }}
+          restore-keys: |
+            digest-site-
+
+      - name: Build weekly digest + HTML dashboard
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_DIGEST_PAGE_ID: ${{ secrets.NOTION_DIGEST_PAGE_ID }}
+          PAGES_BASE_URL: ${{ secrets.PAGES_BASE_URL }}
         run: python build_weekly_digest.py
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
