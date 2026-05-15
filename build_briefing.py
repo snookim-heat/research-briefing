@@ -51,8 +51,8 @@ SEMANTIC_SCHOLAR_QUERIES = [
 ARXIV_LOOKBACK_DAYS = 3        # arXiv는 매일 신선
 JOURNAL_LOOKBACK_DAYS = 30     # 저널은 인덱싱 지연 고려
 
-MAX_PAPERS = 12
-MIN_RELEVANCE_TO_PUSH = 60
+MAX_PAPERS = 30
+MIN_RELEVANCE_TO_PUSH = 50
 
 OPENAI_MODEL = "gpt-4o-mini"
 
@@ -163,7 +163,7 @@ SS_FIELDS = (
 )
 
 
-def fetch_semantic_scholar(query: str, max_results: int = 30) -> list[dict]:
+def fetch_semantic_scholar(query: str, max_results: int = 100) -> list[dict]:
     today = datetime.now(timezone.utc).date()
     start = today - timedelta(days=JOURNAL_LOOKBACK_DAYS)
     date_filter = f"{start.isoformat()}:{today.isoformat()}"
@@ -198,7 +198,7 @@ def fetch_semantic_scholar(query: str, max_results: int = 30) -> list[dict]:
         title = item.get("title") or ""
         if not title:
             continue
-        if len(abstract) < 200:
+        if len(abstract) < 100:
             continue
 
         authors = [a.get("name", "") for a in (item.get("authors") or [])]
