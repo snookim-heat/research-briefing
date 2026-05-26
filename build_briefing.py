@@ -53,7 +53,7 @@ SEMANTIC_SCHOLAR_QUERIES = [
     "transient thermal management electronics",
 ]
 
-ARXIV_LOOKBACK_DAYS = 3
+ARXIV_LOOKBACK_DAYS = 5
 JOURNAL_LOOKBACK_DAYS = 30
 
 # 1차 필터: 이 점수 이상이면 풀 요약으로 진행
