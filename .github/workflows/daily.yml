@@ -3,7 +3,7 @@ name: Daily Notion briefing
 on:
   schedule:
     # 매일 한국시간 오전 8시 = UTC 23:00 (전날)
-    - cron: "0 23 * * *"
+    - cron: "0 23 * * 2,4"
   workflow_dispatch:  # 수동 실행 버튼 활성화
 
 jobs:
